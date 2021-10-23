@@ -5,9 +5,9 @@ class CustomizedCategory extends Component {
     return (
       <div className="container pt-3">
         <div className="row">
+          {/* <div className="col-md-4">Data</div>
           <div className="col-md-4">Data</div>
-          <div className="col-md-4">Data</div>
-          <div className="col-md-4">Data</div>         
+          <div className="col-md-4">Data</div>          */}
         </div>
       </div>
     );

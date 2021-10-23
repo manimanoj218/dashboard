@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import Card from "../components/Card";
+import axios from "axios";
 
 class RawCategory extends Component {
   constructor(props) {
@@ -31,15 +32,19 @@ class RawCategory extends Component {
       ],
       categories: [
         {
-          label: "Dinning",
+          label: "Mis",
           value: false,
         },
         {
-          label: "Entertainment",
+          label: "household",
           value: false,
         },
         {
-          label: "Shopping",
+          label: "travel",
+          value: false,
+        },
+        {
+          label: "hotel",
           value: false,
         },
       ],
@@ -80,26 +85,104 @@ class RawCategory extends Component {
     };
   }
 
+  async componentDidMount() {
+    // await this.getTransactions();
+  }
+
+  getTransactions = async () => {
+    try {
+      const headers = {
+        // Authorization: "Bearer my-token",
+        // "My-Custom-Header": "foobar",
+      };
+      await axios
+        .get("https://dbs.h2h/v1/transactions/category", { headers })
+        .then((response) => {
+          console.log("response", response);
+          this.setState({ transactions: response.data.data });
+        });
+    } catch (error) {
+      console.log("error", error);
+    }
+  };
+
   handleAccountChange = (event, index) => {
     let account = [...this.state.account];
-    account[index].value = !account[index].value;
+    let newAccount = account.map((item, i) => {
+      if (i === index) {
+        return {
+          ...item,
+          value: true,
+        };
+      } else {
+        return {
+          ...item,
+          value: false,
+        };
+      }
+    });
     this.setState({
-      account: account,
+      account: newAccount,
     });
   };
+
   handletTimeChange = (event, index) => {
     let time = [...this.state.time];
-    time[index].value = !time[index].value;
+    let newTimes = time.map((item, i) => {
+      if (i === index) {
+        return {
+          ...item,
+          value: true,
+        };
+      } else {
+        return {
+          ...item,
+          value: false,
+        };
+      }
+    });
     this.setState({
-      time: time,
+      time: newTimes,
     });
   };
+
   handleACategoryChange = (event, index) => {
     let categories = [...this.state.categories];
-    categories[index].value = !categories[index].value;
-    this.setState({
-      categories: categories,
+    let newCategories = categories.map((item, i) => {
+      if (i === index) {
+        return {
+          ...item,
+          value: true,
+        };
+      } else {
+        return {
+          ...item,
+          value: false,
+        };
+      }
     });
+    this.setState(
+      {
+        categories: newCategories,
+      },
+      () => {
+        this.handleFilters();
+      }
+    );
+  };
+
+  handleFilters = () => {
+    let { categories, account, time } = this.state;
+    let categoryType =
+      categories.length > 0
+        ? categories.filter((item) => item.value === true)
+        : "";
+    let timeType =
+      time.length > 0 ? time.filter((item) => item.value === true) : "";
+
+    let accountType =
+      account.length > 0 ? account.filter((item) => item.value === true) : "";
+    console.log("data", categoryType, timeType, accountType);
   };
 
   render() {
@@ -117,6 +200,7 @@ class RawCategory extends Component {
                         <input
                           className="form-check-input"
                           name={acc.label}
+                          checked={acc.value}
                           value={acc.value}
                           onChange={(e) => this.handleAccountChange(e, index)}
                           type="checkbox"
@@ -148,7 +232,7 @@ class RawCategory extends Component {
                 })}
               </div>
               <div className="card-body py-2">
-                <h3>Account</h3>
+                <h3>Categories</h3>
                 {this.state.categories.map((category, index) => {
                   return (
                     <div className="form-check mb-2 mr-sm-2" key={index}>
@@ -169,24 +253,21 @@ class RawCategory extends Component {
               </div>
             </div>
           </div>
-          <div className="col-md-10">
-            {/* {this.state.transactions.map((transaction,index) =>{
-                  return(
-                      <Card transaction={transaction}>
-                  )
-              })} */}
+          <div className="col-md-10">            
             <div className="row">
-              {this.state.transactions.map((transaction, index) => {
-                return (
-                  <div
-                    className="col-md-12"
-                    style={{ marginBottom: "10px" }}
-                    key={index}
-                  >
-                    <Card transaction={transaction}></Card>
-                  </div>
-                );
-              })}
+              {this.state.transactions.length > 0
+                ? this.state.transactions.map((transaction, index) => {
+                    return (
+                      <div
+                        className="col-md-12"
+                        style={{ marginBottom: "10px" }}
+                        key={index}
+                      >
+                        <Card transaction={transaction}></Card>
+                      </div>
+                    );
+                  })
+                : "No Transactions Data"}
             </div>
           </div>
         </div>

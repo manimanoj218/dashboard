@@ -86,7 +86,7 @@ class RawCategory extends Component {
   }
 
   async componentDidMount() {
-    // await this.getTransactions();
+    await this.getTransactions();
   }
 
   getTransactions = async () => {
@@ -95,12 +95,12 @@ class RawCategory extends Component {
         // Authorization: "Bearer my-token",
         // "My-Custom-Header": "foobar",
       };
-      await axios
-        .get("https://dbs.h2h/v1/transactions/category", { headers })
-        .then((response) => {
-          console.log("response", response);
-          this.setState({ transactions: response.data.data });
-        });
+      let res = await axios.get("https://dbs.h2h/v1/transactions/category", {
+        headers,
+      });
+      if (res.data) {
+        this.setState({ transactions: res.data.data });
+      }
     } catch (error) {
       console.log("error", error);
     }
@@ -171,7 +171,7 @@ class RawCategory extends Component {
     );
   };
 
-  handleFilters = () => {
+  handleFilters = async () => {
     let { categories, account, time } = this.state;
     let categoryType =
       categories.length > 0
@@ -183,6 +183,24 @@ class RawCategory extends Component {
     let accountType =
       account.length > 0 ? account.filter((item) => item.value === true) : "";
     console.log("data", categoryType, timeType, accountType);
+    let categoryParam = categoryType.length > 0 ? categoryType[0].label : "";
+    try {
+      const headers = {
+        // Authorization: "Bearer my-token",
+        // "My-Custom-Header": "foobar",
+      };
+      let res = await axios.get(
+        `https://dbs.h2h/v1/transactions/category/${categoryParam}`,
+        {
+          headers,
+        }
+      );
+      if (res.data) {
+        this.setState({ transactions: res.data.data });
+      }
+    } catch (error) {
+      console.log("error", error);
+    }
   };
 
   render() {
@@ -253,7 +271,7 @@ class RawCategory extends Component {
               </div>
             </div>
           </div>
-          <div className="col-md-10">            
+          <div className="col-md-10">
             <div className="row">
               {this.state.transactions.length > 0
                 ? this.state.transactions.map((transaction, index) => {
